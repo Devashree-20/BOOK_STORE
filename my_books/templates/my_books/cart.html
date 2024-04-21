@@ -9,7 +9,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
   <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900&display=swap" rel="stylesheet">
-  <title>Devu's Book Store - Order Books</title>
+  <title>Devu's Book Store - Your Cart</title>
 
   <!-- Additional CSS Files -->
   <link rel="stylesheet" type="text/css" href="{% static 'my_books/assets/css/bootstrap.min.css' %}">
@@ -54,37 +54,52 @@
     </div>
 </header>
 
-    <!-- ***** Header Area End ***** -->
+  <!-- ***** Header Area End ***** -->
 
   <!-- Main Content Area -->
   <div class="main-content" style="margin-top: 150px;">
     <div class="container">
       <div class="row">
-        <!-- Book Listing -->
         <div class="col-lg-12">
           <div class="section-heading">
-            <h2>New Arrivals</h2>
+            <h2>Your Cart</h2>
           </div>
-          <div class="men-item-carousel">
-            <div class="owl-men-item owl-carousel">
-              <!-- Loop through books fetched from Django database -->
-              {% for book in books %}
-              <div class="item">
-                <div class="thumb">
-                  <img src="{{ book.image.url }}" alt="{{ book.title }}">
-                </div>
-                <div class="down-content">
-                  <h4>{{ book.title }}</h4>
-                  <p>{{ book.description }}</p>
-                  <span>Price: EUR {{ book.price }}</span>
-                  <button onclick="addToCart('{{ book.id }}')">Add to Cart</button>
-                </div>
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">#</th>
+                      <th scope="col">Title</th>
+                      <th scope="col">Price</th>
+                      <th scope="col">Quantity</th>
+                      <th scope="col">Total</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in items %}
+                    <tr>
+                      <th scope="row">{{ forloop.counter }}</th>
+                      <td>{{ item.title }}</td>
+                      <td>EUR {{ item.price }}</td>
+                      <td>{{ item.quantity }}</td>
+                      <td>EUR {{ item.price }} * {{ item.quantity }}</td>
+                      <td>
+                        <button onclick="removeFromCart('{{ item.book_id }}')">Remove</button>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
               </div>
-              {% endfor %}
+              <div>
+                <h4>Total: EUR {{ total_price }}</h4>
+              </div>
             </div>
           </div>
         </div>
-        <!-- End Book Listing -->
       </div>
     </div>
   </div>
@@ -165,19 +180,19 @@
   <script src="{% static 'my_books/assets/js/isotope.js'%}"></script>
   <script src="{% static 'my_books/assets/js/custom.js'%}"></script>
 
-  <!-- AJAX Script for Adding to Cart -->
+  <!-- AJAX Script for Removing from Cart -->
   <script>
-    function addToCart(bookId) {
+    function removeFromCart(bookId) {
         $.ajax({
             type: 'POST',
-            url: '{% url "add_to_cart" %}',
+            url: '{% url "remove_from_cart" %}',
             data: {
                 'book_id': bookId,
-                'quantity': 1,
                 'csrfmiddlewaretoken': '{{ csrf_token }}'
             },
             success: function(response) {
-                alert('Item added to cart!');
+                alert('Item removed from cart!');
+                window.location.reload(); // Refresh the page to reflect changes
             },
             error: function(xhr, status, error) {
                 console.error(error);
